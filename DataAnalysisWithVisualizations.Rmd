@@ -1,0 +1,120 @@
+---
+title: "Project"
+author: "Gurk Asahan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+#Data Analysis and Visualization 2 – Project
+#Group Members: Gurkaranjit, Dhruv, Matthew
+
+```{r}
+
+#loading in libraries
+library(tidyverse)
+library(readr)
+
+#reading the cleaned dataset
+df <- read.csv("~/Desktop/Life-Expectancy-Data-Updated.csv")
+
+
+#showing the summary of the stats
+summary(df)
+
+#getting the mean, median, mode, IQR
+summarise(
+  df,
+  mean_life_exp = mean(Life_expectancy),
+  median_life_exp = median(Life_expectancy),
+  mode_life_exp = as.numeric(names(sort(table(Life_expectancy), decreasing = TRUE)[1])),
+  IQR_life_exp = IQR(Life_expectancy)
+)
+
+
+#getting the data types
+str(df)
+
+#correlation matrix
+cor(select_if(df, is.numeric), use = "complete.obs")
+
+```
+
+```{r}
+
+#histogram of life expectancy
+ggplot(df, aes(x = Life_expectancy)) +
+  geom_histogram(binwidth = 2, fill = "skyblue", color = "black") +
+  labs(title = "Distribution of Life Expectancy", x = "Life Expectancy", y = "Count")
+
+```
+
+```{r}
+#boxplot of life expectancy by Economic status
+
+df$Status <- ifelse(df$Economy_status_Developed == 1, "Developed", "Developing")
+
+ggplot(df, aes(x = Status, y = Life_expectancy, fill = Status)) +
+  geom_boxplot() +
+  labs(title = "Life Expectancy by Economic Status")
+
+```
+
+```{r}
+#bar plot of mean life expectancy by region
+# Step-by-step without pipes
+
+#grouping and summarizing
+region_avg <- summarise(
+  group_by(df, Region),
+  avg_life = mean(Life_expectancy)
+)
+
+#plotting
+ggplot(region_avg, aes(x = reorder(Region, avg_life), y = avg_life)) +
+  geom_col(fill = "darkgreen") +
+  coord_flip() +
+  labs(title = "Average Life Expectancy by Region", x = "Region", y = "Average Life Expectancy")
+
+
+```
+
+```{r}
+library(corrplot)
+
+# Select numeric columns and compute correlation matrix
+corr_matrix <- cor(select_if(df, is.numeric), use = "complete.obs")
+
+# Plot the correlation heatmap
+corrplot(
+  corr_matrix,
+  method = "color",
+  type = "lower",
+  tl.cex = 0.8,
+  tl.col = "black",
+  tl.srt = 45,
+  number.cex = 0.7,
+  mar = c(1, 1, 1, 1) 
+)
+
+#loading in the library
+library(ggcorrplot)
+
+#creating the correlationn matrix (numeric variables only)
+corr_matrix <- cor(select_if(df, is.numeric), use = "complete.obs")
+
+#plotting the correlation matrix with labels
+ggcorrplot(
+  corr_matrix,
+  method = "square",
+  type = "full",
+  lab = TRUE,
+  lab_size = 2.5,
+  tl.cex = 10,
+  tl.col = "black",
+  tl.srt = 45,
+  colors = c("blue", "white", "red"),
+  outline.color = "gray"
+)
+
+
+```
+
